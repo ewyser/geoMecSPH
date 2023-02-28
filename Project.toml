@@ -1,0 +1,4 @@
+name = "geoMecSPH"
+uuid = "8e7c95da-5f52-4e42-96d1-9d786f87211b"
+authors = ["Manu Wyser <manuwyser@gmail.com>"]
+version = "0.1.0"
