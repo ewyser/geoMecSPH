@@ -12,15 +12,12 @@ end
 mutable struct point
     # scalars & vectors
     nmp ::Int64
-    l0  ::Array{Float64}
-    l   ::Array{Float64}
+    h   ::Array{Float64}
     v0  ::Array{Float64}
-    v   ::Array{Float64}
     mp  ::Array{Float64}
     xp  ::Array{Float64}
     up  ::Array{Float64}
     vp  ::Array{Float64}
-    pp  ::Array{Float64}
     coh ::Array{Float64}
     cohr::Array{Float64}
     phi ::Array{Float64}
@@ -49,9 +46,4 @@ end
 mutable struct boundary
     x  ::Array{Int64}
     z  ::Array{Int64}
-end
-
-
-struct test
-    X  ::Array{Float64}
 end

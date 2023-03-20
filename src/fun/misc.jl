@@ -137,15 +137,13 @@ function pointSetup(meD,ni,lz,coh0,cohr,phi0,phir,rho0,nstr,typeD)
     # material point's quantities
     # scalars & vectors
     nmp  = length(xlt)
-    l0   =  ones(typeD,nmp,2).*0.5.*(meD.h[1]./ni)
-    l    =  ones(typeD,nmp,2).*0.5.*(meD.h[1]./ni)
-    v0   =  ones(typeD,nmp,1).*(2.0.*l0[:,1].*2.0.*l0[:,2])
-    v    =  ones(typeD,nmp,1).*(2.0.*l[:,1].*2.0.*l[:,2])
+    l0   = ones(typeD,nmp,2).*0.5.*(meD.h[1]./ni)
+    v0   = ones(typeD,nmp,1).*(2.0.*l0[:,1].*2.0.*l0[:,2])
+    h0   = ones(typeD,nmp,1).*3.0*meD.h[1]
     m    = rho0.*v0
     xp   = hcat(xlt,zlt)
     up   = zeros(typeD,nmp,2) 
     vp   = zeros(typeD,nmp,2)
-    pp   = zeros(typeD,nmp,2)
     coh  =  ones(typeD,nmp,1).*coh0#clt
     coh  =  clt
     coh,phi  = RFS(xp[:,1],xp[:,2],coh0,cohr,phi0,phir)
@@ -178,7 +176,7 @@ function pointSetup(meD,ni,lz,coh0,cohr,phi0,phir,rho0,nstr,typeD)
     p2e  = zeros(UInt64,nmp,1)
     p2n  = zeros(UInt64,nmp,nn)
     # push to struct
-    mpD  = point(nmp,l0,l,v0,v,m,xp,up,vp,pp,coh,cohr,phi,epII,J,
+    mpD  = point(nmp,h0,v0,m,xp,up,vp,coh,cohr,phi,epII,J,
                  dF,F,b,bT,e,ome,s,τ,dev,ep,ϕ,∂ϕx,∂ϕz,B,p2e,p2n)
     return(mpD)
 end

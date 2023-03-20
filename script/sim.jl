@@ -7,7 +7,7 @@
     # non-dimensional constant 
     # ---------------------------------------------------------------------------
     ν       = 0.3                                                               # poisson's ratio                                                        
-    ni      = 2                                                                 # number of material point along 1d
+    ni      = 3                                                                 # number of material point along 1d
     nstr    = 4                                                                 # number of stresses
     # ---------------------------------------------------------------------------
     # independant physical constant
@@ -51,6 +51,7 @@
     
 
     tw = 0.0
+    t  = 1.0
     it = 0
     itps = 0.0
     nout = 50
@@ -65,7 +66,26 @@
     println("o---------------------------------------------o") 
     println("[=> action!")
     prog  = ProgressUnknown("working hard:", spinner=true,showspeed=true)
+    Q = zeros(size(mpD.ϕ))
     while tw<t
+        # 1st SPH kernel using a Wendland type kernel
+        for i in 1:mpD.nmp
+            for j in 1:mpD.nmp
+                #if i != j
+                    Δx = mpD.xp[i,1]-mpD.xp[j,1]
+                    Δz = mpD.xp[i,2]-mpD.xp[j,2]
+                    r  = sqrt(Δx*Δx+Δz*Δz)
+                    q  = r/mpD.h[i]
+                    if 0.0<=q<=2.0
+                        f = ((1.0-0.5*q)^4)*(1.0+2.0*q)
+                    elseif 2.0 < q
+                        f = 0.0
+                    end
+                    Q[i,j] = q
+                    mpD.ϕ[i,j] = (7.0/(4.0*π))*f
+                #end
+            end
+        end
 
         tw += Δt
         it += 1
@@ -77,6 +97,35 @@
     ProgressMeter.finish!(prog, spinner = '✓',showvalues = [("[nel,np]",(round(Int64,meD.nel[1]*meD.nel[2]),mpD.nmp)),("iteration(s)",it),("(✓) t/T",1.0)])
     savefig(path_plot*"plot.png")
     @info "Figs saved in" path_plot
+
+    gr(size=(100,100),legend=true,markersize=2.5)
+
+
+
+
+    default(
+        fontfamily="Computer Modern",
+        linewidth=2,
+        framestyle=:box,
+        label=nothing,
+        grid=false
+        )
+        i = 10
+        q = hcat(Q[i,:])
+        w = hcat(mpD.ϕ[i,:])
+        gr(size=(400,200))
+        plot(q,w,
+            markershape=:circle,
+            label="",
+            show=true,
+            xlim=(-2.5,2.5),
+            xlabel=L"r_{kl}=||\mathbf{r}_k-\mathbf{r}_l||_2/h",
+            ylabel=L"\omega_k(r_{kl})"
+        ) 
+        savefig(path_plot*"wendland_kernel.png")
+
+
+
     println("[=> done! exiting...")
 end
 
