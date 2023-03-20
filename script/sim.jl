@@ -2,7 +2,7 @@
     # arithmetic precision (double=Float64 or single=Float32)
     typeD = Float64  
     # ---------------------------------------------------------------------------
-    nel = 80
+    nel = 200
     # ---------------------------------------------------------------------------
     # non-dimensional constant 
     # ---------------------------------------------------------------------------
@@ -50,13 +50,6 @@
 
     
 
-    bcx = ones(meD.nno[3],1)
-    bcx[bc.x] .= 0
-    bc.x = bcx
-    bcz = ones(meD.nno[3],1)
-    bcz[bc.z] .= 0
-    bc.z = bcz
-
     tw = 0.0
     it = 0
     itps = 0.0
@@ -65,7 +58,7 @@
     flag = 0
 
     println("o---------------------------------------------o")
-    println("|             ** geoMecSPH v1.0 **              |")
+    println("|             ** geoMecSPH v1.0 **            |")
     println("|      -- finite strain formulation --        |")
     println("o---------------------------------------------o")
     @info "initial geometry:" nel=Int64(meD.nel[3]) nno=meD.nno[3] nmp=mpD.nmp
@@ -73,25 +66,7 @@
     println("[=> action!")
     prog  = ProgressUnknown("working hard:", spinner=true,showspeed=true)
     while tw<t
-        #=
-        Δt  = get_Δt(mpD.vp,meD.h,yd)
-        g   = get_g(tw,tg)
-        topol!(mpD.p2e,mpD.p2n,meD.e2n,meD.xn,meD.zn,mpD.xp,meD.h,meD.nel,mpD.nmp,meD.nn)
-        ϕ∂ϕ!(mpD.B,mpD.ϕ,mpD.∂ϕx,mpD.∂ϕz,mpD.xp,meD.xn,meD.zn,mpD.p2n,meD.h,meD.xB,meD.nn,mpD.nmp)
-        accum!(meD.mn,meD.pn,meD.fen,meD.fin,mpD.σ,mpD.τ,mpD.J,mpD.vp,mpD.v,mpD.mp,mpD.ϕ,mpD.B,mpD.p2n,g,mpD.nmp,meD.nn)
-        solve!(meD.fn,meD.an,meD.pn,meD.vn,meD.mn,meD.fen,meD.fin,bc.x,bc.z,meD.nno,Δt)
-        flip!(mpD.vp,mpD.xp,mpD.ϕ,meD.an,meD.vn,mpD.p2n,mpD.nmp,Δt) 
-        DMBC!(mpD.up,meD.pn,meD.un,meD.mn,mpD.ϕ,mpD.vp,mpD.mp,mpD.p2n,bc.x,bc.z,mpD.nmp,meD.nn,meD.nno,Δt)   # need to be improved
-        elast!(mpD.τ,mpD.ϵ,mpD.J,mpD.v,mpD.v0,mpD.l,mpD.l0,mpD.F,meD.un,mpD.∂ϕx,mpD.∂ϕz,mpD.p2n,mpD.nmp,Del) # need to be improved
-        if(tw>te)
-            #plast!(mpD.τ,mpD.ϵ,mpD.epII,mpD.coh,mpD.phi,mpD.nmp,Del,Hp,cr)
-            CPAplast!(mpD.τ,mpD.ϵ,mpD.epII,mpD.coh,mpD.phi,mpD.nmp,Del,Hp,cr)
-            if(flag==0)
-                plot_coh(mpD.xp,mpD.coh,mpD.phi,ϕ0)
-                flag+=1
-            end
-        end
-        =#
+
         tw += Δt
         it += 1
         if(mod(it,nout)==0)
