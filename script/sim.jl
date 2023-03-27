@@ -7,7 +7,7 @@
     # non-dimensional constant 
     # ---------------------------------------------------------------------------
     ν       = 0.3                                                               # poisson's ratio                                                        
-    ni      = 2                                                                 # number of material point along 1d
+    ni      = 3                                                                 # number of material point along 1d
     nstr    = 4                                                                 # number of stresses
     # ---------------------------------------------------------------------------
     # independant physical constant
@@ -74,9 +74,9 @@
         for i in 1:mpD.nmp
             Δρ = 0.0
             for j in 1:mpD.nmp
-                    Δx = (mpD.x[i,1]-mpD.x[j,1])
-                    Δz = (mpD.x[i,2]-mpD.x[j,2])
-                    r  = sqrt(Δx*Δx+Δz*Δz)
+                    rx = (mpD.x[i,1]-mpD.x[j,1])
+                    rz = (mpD.x[i,2]-mpD.x[j,2])
+                    r  = sqrt(rx^2+rz^2)
                     q  = r/mpD.h[i]
                     if 0.0<=q<=2.0
                         f = ((1.0-0.5*q)^4)*(1.0+2.0*q)
@@ -87,13 +87,13 @@
                     end
                     Q[i,j]       = q
                     mpD.ϕ[i,j]   = α*f
-                    mpD.∂ϕx[i,j] = α*∂f#(Δx/r)*∂f
-                    mpD.∂ϕz[i,j] = α*∂f#(Δz/r)*∂f
+                    mpD.∂ϕx[i,j] = α*∂f/mpD.h[i]#*(rx/r)
+                    mpD.∂ϕz[i,j] = α*∂f/mpD.h[i]#*(rz/r)
                     
                     Δρ += mpD.m[j]*((mpD.v[i,1]-mpD.v[j,1])*mpD.∂ϕx[i,j]+(mpD.v[i,2]-mpD.v[j,2])*mpD.∂ϕz[i,j])
                     
             end
-            rho[i]=rho[i]+Δt*Δρ
+            rho[i]+=Δt*Δρ
         end
 
         mpD.x .= mpD.x.+Δt*mpD.v
@@ -101,7 +101,7 @@
         tw += Δt
         it += 1
         if(mod(it,nout)==0)
-            plot_Δϵp(mpD.x,mpD.epII)       
+            plot_ρ(mpD.x,rho.-ρ0,(-10.0,10.0))    
         end 
         next!(prog;showvalues = [("[nel,np]",(round(Int64,meD.nel[1]*meD.nel[2]),mpD.nmp)),("iteration(s)",it),("(✗) t/T",round(tw/t,digits=2))])
     end
@@ -109,7 +109,7 @@
     savefig(path_plot*"plot.png")
     @info "Figs saved in" path_plot
 
-    gr(size=(100,100),legend=true,markersize=2.5)
+    gr(size=(50,100),legend=true,markersize=2.5)
 
 
 
@@ -118,17 +118,18 @@
         linewidth=2,
         framestyle=:box,
         label=nothing,
-        grid=false
+        grid=true
         )
         i = 10
         q = hcat(Q[i,:])
         w = hcat(mpD.ϕ[i,:])
-        gr(size=(400,200))
+        gr(size=(200,200))
         plot(q,w,
             markershape=:circle,
             label="",
             show=true,
-            xlim=(-2.5,2.5),
+            xlim=(0.0,3.0),
+            ylim=(-0.8,0.8),
             xlabel=L"r_{kl}=\dfrac{1}{h} \| \| \mathbf{r}_{k}-\mathbf{r}_{l} \| \| _2",
             ylabel=L"\omega_k(r_{kl})"
         ) 
@@ -138,17 +139,18 @@
         linewidth=2,
         framestyle=:box,
         label=nothing,
-        grid=false
+        grid=true
         )
         i = 10
         q = hcat(Q[i,:])
         w = hcat(mpD.∂ϕx[i,:])
-        gr(size=(400,200))
+        gr(size=(200,200))
         plot(q,w,
             markershape=:circle,
             label="",
             show=true,
-            xlim=(-2.5,2.5),
+            xlim=(0.0,3.0),
+            ylim=(-0.8,0.8),
             xlabel=L"r_{kl}=\dfrac{1}{h} \| \| \mathbf{r}_{k}-\mathbf{r}_{l} \| \| _2",
             ylabel=L"\partial\omega_k(r_{kl})"
         ) 

@@ -87,16 +87,16 @@ function pointSetup(meD,ni,lz,coh0,cohr,phi0,phir,rho0,nstr,typeD)
     pos = Float64 
 
     for mp in 1:length(xp)
-        xc0 = 0.25*(meD.xB[2]-meD.xB[1])
-        zc0 = 0.25*(lz)
-        xc1 = 0.75*(meD.xB[2]-meD.xB[1])
-        zc1 = 0.75*(lz)
+        xc0 = 0.4*(meD.xB[2]-meD.xB[1])
+        zc0 = 0.4*(lz)
+        xc1 = 0.6*(meD.xB[2]-meD.xB[1])
+        zc1 = 0.6*(lz)
         dx = xc1-xc0
         dz = zc1-zc0
     
         vx = dx/(sqrt(dx*dx+dz*dz))
         vz = dz/(sqrt(dx*dx+dz*dz))
-        v  = 2.5
+        v  = 20.5
 
         r  = 0.1*lz
         Δx = xp[mp]-xc0
@@ -286,4 +286,16 @@ end
                 clims=(0.0,2.0),
                 ylim=(-10.0,20.0),
                 )     
+end
+@views function plot_ρ(x,ρ,clim)
+    gr(size=(2*250,2*125),legend=true,markersize=1.0)
+    scatter(x[:,1],x[:,2],zcolor=ρ,
+        markershape=:circle,
+        label="",
+        show=true,
+        aspect_ratio=1,
+        c=:viridis,
+        clims=(clim[1],clim[2]),
+        ylim=(0.0,10.0),
+        )     
 end
