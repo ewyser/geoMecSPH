@@ -7,7 +7,7 @@
     # non-dimensional constant 
     # ---------------------------------------------------------------------------
     ν       = 0.3                                                               # poisson's ratio                                                        
-    ni      = 3                                                                 # number of material point along 1d
+    ni      = 2                                                                 # number of material point along 1d
     nstr    = 4                                                                 # number of stresses
     # ---------------------------------------------------------------------------
     # independant physical constant
@@ -48,10 +48,10 @@
     #p       = [g;ρ0;ψ0;ν;E;Kc;Gc;cr;Hp;t;te;tg]
     #writedlm("/Users/manuwyser/Dropbox/PhD_Thesis/git_local/work_mpm/C_code_2D/scripts/setting_Exp2b/phys.txt" ,p)
 
-    
+    rho   = ρ0*ones(typeD,mpD.nmp,2) 
 
     tw = 0.0
-    t  = 1.0
+    t  = 0.25
     it = 0
     itps = 0.0
     nout = 5
@@ -68,34 +68,40 @@
     prog  = ProgressUnknown("working hard:", spinner=true,showspeed=true)
     Q = zeros(size(mpD.ϕ))
     while tw<t
-        # 1st SPH kernel using a Wendland type kernel
+        ## 1st SPH kernel using a Wendland type kernel
+        # ------------------------------------------------------------------------------------------------------------------------------------------------------------#
+        α = (7.0/(4.0*π))
         for i in 1:mpD.nmp
+            Δρ = 0.0
             for j in 1:mpD.nmp
-                #if i != j
-                    Δx = mpD.xp[i,1]-mpD.xp[j,1]
-                    Δz = mpD.xp[i,2]-mpD.xp[j,2]
+                    Δx = (mpD.x[i,1]-mpD.x[j,1])
+                    Δz = (mpD.x[i,2]-mpD.x[j,2])
                     r  = sqrt(Δx*Δx+Δz*Δz)
                     q  = r/mpD.h[i]
                     if 0.0<=q<=2.0
                         f = ((1.0-0.5*q)^4)*(1.0+2.0*q)
+                        ∂f= -5.0*q*(1.0-0.5*q)^3
                     elseif 2.0 < q
                         f = 0.0
+                        ∂f= 0.0
                     end
-                    Q[i,j] = q
-                    mpD.ϕ[i,j] = (7.0/(4.0*π))*f
-
-                     
-
-                #end
+                    Q[i,j]       = q
+                    mpD.ϕ[i,j]   = α*f
+                    mpD.∂ϕx[i,j] = α*∂f#(Δx/r)*∂f
+                    mpD.∂ϕz[i,j] = α*∂f#(Δz/r)*∂f
+                    
+                    Δρ += mpD.m[j]*((mpD.v[i,1]-mpD.v[j,1])*mpD.∂ϕx[i,j]+(mpD.v[i,2]-mpD.v[j,2])*mpD.∂ϕz[i,j])
+                    
             end
+            rho[i]=rho[i]+Δt*Δρ
         end
 
-        mpD.xp .= mpD.xp.+0.1*mpD.vp
+        mpD.x .= mpD.x.+Δt*mpD.v
 
         tw += Δt
         it += 1
         if(mod(it,nout)==0)
-            plot_Δϵp(mpD.xp,mpD.epII)       
+            plot_Δϵp(mpD.x,mpD.epII)       
         end 
         next!(prog;showvalues = [("[nel,np]",(round(Int64,meD.nel[1]*meD.nel[2]),mpD.nmp)),("iteration(s)",it),("(✗) t/T",round(tw/t,digits=2))])
     end
@@ -104,7 +110,6 @@
     @info "Figs saved in" path_plot
 
     gr(size=(100,100),legend=true,markersize=2.5)
-
 
 
 
@@ -128,6 +133,26 @@
             ylabel=L"\omega_k(r_{kl})"
         ) 
         savefig(path_plot*"wendland_kernel.png")
+    default(
+        fontfamily="Computer Modern",
+        linewidth=2,
+        framestyle=:box,
+        label=nothing,
+        grid=false
+        )
+        i = 10
+        q = hcat(Q[i,:])
+        w = hcat(mpD.∂ϕx[i,:])
+        gr(size=(400,200))
+        plot(q,w,
+            markershape=:circle,
+            label="",
+            show=true,
+            xlim=(-2.5,2.5),
+            xlabel=L"r_{kl}=\dfrac{1}{h} \| \| \mathbf{r}_{k}-\mathbf{r}_{l} \| \| _2",
+            ylabel=L"\partial\omega_k(r_{kl})"
+        ) 
+        savefig(path_plot*"wendland_kernel_derivative.png")
 
 
 

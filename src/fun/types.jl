@@ -14,10 +14,10 @@ mutable struct point
     nmp ::Int64
     h   ::Array{Float64}
     v0  ::Array{Float64}
-    mp  ::Array{Float64}
-    xp  ::Array{Float64}
-    up  ::Array{Float64}
-    vp  ::Array{Float64}
+    m   ::Array{Float64}
+    x   ::Array{Float64}
+    u   ::Array{Float64}
+    v   ::Array{Float64}
     coh ::Array{Float64}
     cohr::Array{Float64}
     phi ::Array{Float64}
