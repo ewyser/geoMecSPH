@@ -54,7 +54,7 @@
     t  = 1.0
     it = 0
     itps = 0.0
-    nout = 50
+    nout = 5
     wct  = 0.0
     flag = 0
 
@@ -83,9 +83,14 @@
                     end
                     Q[i,j] = q
                     mpD.ϕ[i,j] = (7.0/(4.0*π))*f
+
+                     
+
                 #end
             end
         end
+
+        mpD.xp .= mpD.xp.+0.1*mpD.vp
 
         tw += Δt
         it += 1
@@ -119,7 +124,7 @@
             label="",
             show=true,
             xlim=(-2.5,2.5),
-            xlabel=L"r_{kl}=||\mathbf{r}_k-\mathbf{r}_l||_2/h",
+            xlabel=L"r_{kl}=\dfrac{1}{h} \| \| \mathbf{r}_{k}-\mathbf{r}_{l} \| \| _2",
             ylabel=L"\omega_k(r_{kl})"
         ) 
         savefig(path_plot*"wendland_kernel.png")

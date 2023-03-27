@@ -81,35 +81,50 @@ function pointSetup(meD,ni,lz,coh0,cohr,phi0,phir,rho0,nstr,typeD)
   
     xlt = Float64[]
     zlt = Float64[]
+    vxlt = Float64[]
+    vzlt = Float64[]
     clt = Float64[]
     pos = Float64 
 
-
     for mp in 1:length(xp)
-        xc = 0.25*(meD.xB[2]-meD.xB[1])
-        zc = 0.25*(lz)
+        xc0 = 0.25*(meD.xB[2]-meD.xB[1])
+        zc0 = 0.25*(lz)
+        xc1 = 0.75*(meD.xB[2]-meD.xB[1])
+        zc1 = 0.75*(lz)
+        dx = xc1-xc0
+        dz = zc1-zc0
+    
+        vx = dx/(sqrt(dx*dx+dz*dz))
+        vz = dz/(sqrt(dx*dx+dz*dz))
+        v  = 2.5
 
         r  = 0.1*lz
-        Δx = xp[mp]-xc
-        Δz = zp[mp]-zc
+        Δx = xp[mp]-xc0
+        Δz = zp[mp]-zc0
         d  = sqrt(Δx*Δx+Δz*Δz)
         if d<=r
             push!(xlt, xp[mp]) # push!(inArray, What), incremental construction of an array of arbitrary size
             push!(zlt, zp[mp])
+            push!(vxlt, v*vx)
+            push!(vzlt, v*vz)
         end
 
-        xc = 0.75*(meD.xB[2]-meD.xB[1])
-        zc = 0.75*(lz)
+
 
         r  = 0.1*lz
-        Δx = xp[mp]-xc
-        Δz = zp[mp]-zc
+        Δx = xp[mp]-xc1
+        Δz = zp[mp]-zc1
         d  = sqrt(Δx*Δx+Δz*Δz)
         if d<=r
             push!(xlt, xp[mp]) # push!(inArray, What), incremental construction of an array of arbitrary size
             push!(zlt, zp[mp])
+            push!(vxlt, -v*vx)
+            push!(vzlt, -v*vz)
+
         end
     end
+
+
 #=
     for mp in 1:length(xp)
         for p in 1:length(z)
@@ -144,6 +159,7 @@ function pointSetup(meD,ni,lz,coh0,cohr,phi0,phir,rho0,nstr,typeD)
     xp   = hcat(xlt,zlt)
     up   = zeros(typeD,nmp,2) 
     vp   = zeros(typeD,nmp,2)
+    vp   = hcat(vxlt,vzlt)
     coh  =  ones(typeD,nmp,1).*coh0#clt
     coh  =  clt
     coh,phi  = RFS(xp[:,1],xp[:,2],coh0,cohr,phi0,phir)
