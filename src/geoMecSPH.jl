@@ -1,35 +1,51 @@
 module geoMecSPH
 
-export sim # host code
+# Define module location as constant
+const SRC = @__DIR__
 
+# Export main simulation functions
+export sim, ic_slump
+# Export plotting functions
+export plot_ρ, plot_coh, plot_Δu, plot_P, plot_Δϵp
+# Export utility functions
+export get_Δt, get_g
 
-#include dependencies
-include("_superORCH.jl")
+# Include boot file
+include(joinpath(SRC, "boot/boot.jl"))
 
-# relative path for figs & data
-global path_plot = "./out/"
-if isdir(path_plot)==false
-    mkdir(path_plot)    
+@doc raw"""
+    geoMecSPH
+
+A geomechanical code within an explicit SPH/MPM numerical framework.
+
+## Features
+- Elastoplastic material models
+- Updated Lagrangian formulation
+- Multiple shape function bases (GIMP, B-spline)
+- PIC-FLIP mapping schemes
+
+## Quick Start
+```julia
+using geoMecSPH
+
+# Run default simulation
+sim()
+
+# Or create custom initial conditions
+setup = ic_slump(nel=200, lx=64.1584, lz=12.80)
+```
+
+## Reference
+Based on the Material Point Method (MPM) and Smoothed Particle Hydrodynamics (SPH).
+Refactored following ElastoPlasm.jl architecture.
+
+## Usage
+Run with: `julia -O3 --threads=auto --check-bounds=no --project=.`
+"""
+geoMecSPH
+
+function __init__()
+    welcome_log()
 end
 
-#include main
-# include geoflow routine in saintVenant module
-@doc raw"""
-geoflow(lx::Float64,ly::Float64,nx::Int64,T::Float64,tC::Float64,rheoType::String,solvType::String,isViz::Bool): solves a non-linear hyperbolic 2D Saint-Venant problem considering a Coulomb-type rheology within a finite volume framework on a Cartesian grid
-# args:
-- lx       : dimension along the x-direciton in [m].
-- ly       : dimension along the y-direciton in [m].
-- nx       : number of grid nodes along the x-direction  in [-].
-- T        : total simulation time in [s].
-- tC       : time interval for saving/plotting
-- rheoType : select the rheology, i.e., "coulomb", "newtonian" or "plastic"
-- solveType: select the numerical flux, i.e., "Rusanov", "HLL" or "HLLC"
-- isViz    : plot or save, true or false
-To run geoflow() on a GPU, add *_D, i.e., geoflow_D(lx::Float64,ly::Float64,nx::Int64,T::Float64,tC::Float64,rheoType::String,solvType::String,isViz::Bool)
-"""
-sim()
-include(joinpath("../script","sim.jl"))
-
 end # module geoMecSPH
-
-# julia -O3 --threads=auto --check-bounds=no --project=.
